@@ -1,0 +1,75 @@
+#!/usr/bin/python3
+
+import dbus
+import sys
+from dbus.mainloop.glib import DBusGMainLoop
+from gi.repository import GLib
+
+DBusGMainLoop(set_as_default=True)
+
+USE_DESKTOP_NAMES = False
+ACCENT_COLOR = "#81a1c1"
+SEPARATOR = "|"
+
+class SignalManager:
+    def __init__(self):
+        self.session_bus = dbus.SessionBus()
+        self.desktop_manager = self.session_bus.get_object("org.kde.KWin","/VirtualDesktopManager")
+        self.session_bus.add_signal_receiver(self.printDesktopInfo,dbus_interface="org.kde.KWin.VirtualDesktopManager",path="/VirtualDesktopManager",signal_name="currentChanged")
+        self.printDesktopInfo()
+        loop = GLib.MainLoop()
+        try:
+            loop.run()
+        except KeyboardInterrupt:
+            print("Keyboard interrupt received, exiting...")
+    def printDesktopInfo(self,sender=None):
+        moduleText = ""
+        desktops = self.desktop_manager.Get("org.kde.KWin.VirtualDesktopManager","desktops")
+        currentDesktop = self.session_bus.get_object("org.kde.KWin","/KWin").currentDesktop()
+        desktopCount = len(desktops)
+        for i in range(0,desktopCount):
+            if USE_DESKTOP_NAMES:
+                desktopName = desktops[i][2]
+            else:
+                desktopName = str(i+1)
+            if i+1 == currentDesktop:
+                moduleText += "%{F" + ACCENT_COLOR + "}" + desktopName + "%{F-} "
+            else:
+                moduleText += desktopName + " "
+            if i+1 != desktopCount:
+                moduleText += SEPARATOR + " "
+        print(moduleText)
+        sys.stdout.flush()
+
+if len(sys.argv) > 1:
+    next_arg_is_color = False
+    next_arg_is_separator = False
+    for arg in sys.argv[1:]:
+        match arg:
+            case "-n":
+                USE_DESKTOP_NAMES = True
+            case "-s":
+                next_arg_is_separator = True
+            case "-ac":
+                next_arg_is_color = True
+            case "prev":
+                dbus.SessionBus().get_object("org.kde.KWin","/KWin").previousDesktop()
+                sys.exit(0)
+            case "next":
+                dbus.SessionBus().get_object("org.kde.KWin","/KWin").nextDesktop()
+                sys.exit(0)
+            case _:
+                if next_arg_is_color:
+                    ACCENT_COLOR = arg
+                    next_arg_is_color = False
+                elif next_arg_is_separator:
+                    SEPARATOR = arg
+                    next_arg_is_separator = False
+                else:
+                    print("Usage: " + sys.argv[0] + " ARGUMENTS\n\nDefault behaviour: Prints the desktop numbers/names once, then prints them again everytime the user switches to another desktop, marking the current desktop with Lemonbar format codes.\n\nArguments:\n-n\t\t\tUse desktop names instead of numbers\n-s {SEPARATOR}\t\tSet the separator between desktop numbers/names\n-ac {COLOR}\t\tSet the color of the current desktop\nprev\t\t\tSwitch to previous desktop\nnext\t\t\tSwitch to next desktop")
+                    sys.exit(0)
+    if next_arg_is_color or next_arg_is_separator:
+        print("ERROR: " + sys.argv[-1] + " requires an argument!")
+        sys.exit(-1)
+
+signalManager = SignalManager()
