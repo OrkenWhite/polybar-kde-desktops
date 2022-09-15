@@ -4,13 +4,13 @@ This is a Python script for Polybar, which displays the available KDE virtual de
 The script uses D-Bus for monitoring desktop change events and only updates when needed.
 
 ## Arguments
-| Argument       | Description                                         |
-|----------------|-----------------------------------------------------|
-| -n             | Print desktop names instead of numbers              |
-| -ac *COLOR*    | Use another highlight color for active desktop      |
-| -s *SEPARATOR* | Use another separator character                     |
-| prev           | Switch to the previous desktop and terminate script |
-| next           | Switch to the next desktop and terminate script     |
+| Argument       | Description                                                                                 |
+|----------------|---------------------------------------------------------------------------------------------|
+| -n             | Print desktop names instead of numbers                                                      |
+| -ac *COLOR*    | Use another highlight color for active desktop. Color should be entered in hex(ex. #ff0000) |
+| -s *SEPARATOR* | Use another separator character                                                             |
+| prev           | Switch to the previous desktop and terminate script                                         |
+| next           | Switch to the next desktop and terminate script                                             |
 
 ## Example Polybar configuration
 ```ini
