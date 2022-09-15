@@ -16,7 +16,7 @@ The script uses D-Bus for monitoring desktop change events and only updates when
 ```ini
 [module/kde-desktops]
 type = custom/script
-exec = ~/.config/polybar/scripts/polybar-kde-desktops.py
+exec = ~/.config/polybar/scripts/polybar-kde-desktops
 scroll-up = ~/.config/polybar/scripts/polybar-kde-desktops prev &
 scroll-down = ~/.config/polybar/scripts/polybar-kde-desktops next &
 tail = true
